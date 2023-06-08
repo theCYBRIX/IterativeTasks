@@ -151,7 +151,7 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
 
 
     /**
-     * @param failedTaskHandler The FailedTaskHandler for this object. If set to {@code null}, no FailedTaskHandler will be used.
+     * @param failedTaskHandler The {@link FailedTaskHandler} for this object. If set to {@code null}, no handler will be used.
      */
     public void setFailedTaskHandler(FailedTaskHandler<? extends E> failedTaskHandler) {
         this.failedTaskHandler = failedTaskHandler;
@@ -215,14 +215,14 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
 
 
     /**
-     * @return {@code true} if the IterativeTask process is running (also true when paused). Otherwise {@code false}.
+     * @return {@code true} if this executer is running (also true when paused). Otherwise {@code false}.
      */
     final public boolean isRunning() {
         return running;
     }
 
     /**
-     * @return {@code true} if the IterativeTask process is paused. Otherwise {@code false}.
+     * @return {@code true} if this executer is paused. Otherwise {@code false}.
      */
     final public boolean isPaused() {
         return paused;
@@ -243,7 +243,7 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     }
 
     /**
-     * @return the exception resulting in task failure, if the task failed.
+     * @return the exception which caused the executer to halt, if one exists.
      */
     public Optional<Exception> getReasonOfFailure() {
         return Optional.ofNullable(reasonOfFailure);
@@ -252,7 +252,7 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     /**
      * Attaches the callback to this task. The methods of this callback will be called when the designated milestones are reached.
      * @param callback the callback object to attach to this task.
-     * @throws NullPointerException if the parameter is null.
+     * @throws NullPointerException if {@code null} is passed to this method.
      */
     final public void attachCallback(TaskExecutionListener<? super E> callback) throws NullPointerException{
         this.CALLBACKS.add(Objects.requireNonNull(callback));
@@ -265,7 +265,7 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
      * @implNote if a {@code NullPointerException} is thrown, no objects from the Collection will be attached.
      */
     final public void attachCallbacks(Collection<? extends TaskExecutionListener<? super E>> callbacks) throws NullPointerException{
-        if(callbacks.contains(null)) throw new NullPointerException();
+        if(Objects.requireNonNull(callbacks).contains(null)) throw new NullPointerException();
         this.CALLBACKS.addAll(callbacks);
     }
 
@@ -289,12 +289,14 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     }
 
     /**
-     * Creates and returns a new ProgressWatcher for this IterativeTask object. 
+     * Creates and returns a new {@code ProgressWatcher} for this {@code IterativeTask} object. 
      * @param callbacks The callback for the watcher to use. 
      * @param updateDelayMS The number of milliseconds between callbacks.
-     * @return the created ProgressWatcher.
+     * @return the created {@code ProgressWatcher}.
      * @throws IllegalArgumentException if {@code updateDelayMS <= 0}
      * @throws NullPointerException if a null pointer was passed to the method
+     * @see ProgressWatcher
+     * @see IterativeTask
      */
     final public ProgressWatcher<E> createProgressWatcher(ProgressWatcher.ProgressListener<? super E> callbacks, int updateDelayMS) throws IllegalArgumentException, NullPointerException{
         return new ProgressWatcher<E>(this, callbacks, updateDelayMS);
@@ -305,12 +307,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskStarted(){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskStarted(EXECUTER, TASK);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskStarted(EXECUTER, TASK);
         };
 
         callbackService.submit(callback);
@@ -319,12 +318,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskPaused(){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskPaused(EXECUTER, TASK);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskPaused(EXECUTER, TASK);
         };
 
         callbackService.submit(callback);
@@ -333,12 +329,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskResumed(){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskResumed(EXECUTER, TASK);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskResumed(EXECUTER, TASK);
         };
 
         callbackService.submit(callback);
@@ -348,12 +341,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskFailed(Exception reason){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskFailed(EXECUTER, TASK, reason);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskFailed(EXECUTER, TASK, reason);
         };
 
         callbackService.submit(callback);
@@ -362,12 +352,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskCancelled(){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskCancelled(EXECUTER, TASK);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskCancelled(EXECUTER, TASK);
         };
 
         callbackService.submit(callback);
@@ -376,12 +363,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskCompleted(){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskCompleted(EXECUTER, TASK);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskCompleted(EXECUTER, TASK);
         };
 
         callbackService.submit(callback);
@@ -390,12 +374,9 @@ public class TaskExecuter<E extends IterativeTask> implements Runnable {
     final private void onTaskEnd(){
         final TaskExecuter<E> EXECUTER = this;
         final E TASK = this.task;
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                for(TaskExecutionListener<? super E> c : CALLBACKS)
-                    c.onTaskEnd(EXECUTER, TASK);
-            }
+        Runnable callback = () -> {
+            for(TaskExecutionListener<? super E> c : CALLBACKS)
+                c.onTaskEnd(EXECUTER, TASK);
         };
 
         callbackService.submit(callback);

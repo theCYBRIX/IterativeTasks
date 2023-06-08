@@ -1,7 +1,15 @@
 package com.mjsd.Tasks;
 
+/**
+ * The {@code IterativeTask} interface is intended to be used in conjunction with the {@code TaskExecuter} class, to complete piecewise
+ * operations in an asynchronous manner.
+ * <p>
+ * {@code IterativeTasks}, when run within a {@code TaskExecuter} have the benefit of being cancelled and undone, or paused and resumed dynamically,
+ * while also providing feedback on the progression of the given task. 
+ * @see TaskExecuter
+ */
 public interface IterativeTask {
-
+    
     /**
      * Prepares the task for execution.
      * After this method is called, {@code hasNext()} should result in {@code true}, until no more calls to {@code next()} are required for task completion.
@@ -12,7 +20,7 @@ public interface IterativeTask {
     public void prepare() throws Exception;
 
     /**
-     * Reports if the IterativeTask has more steps to complete within the {@code next()} method.
+     * Reports if the {@link IterativeTask} has more steps to complete within the {@code next()} method.
      * @return {@code true} if more calls to {@code next()} are required for task completion.
      * @apiNote This should result {@code false} prior to {@code prepare()} being called; after which it should result {@code true}, until no more calls to {@code next()} are required, and it is safe to call {@code finish()}.
      * @see #prepare()
@@ -22,7 +30,7 @@ public interface IterativeTask {
     public boolean hasNext();
 
     /**
-     * Performs the a piece of the IterativeTask.
+     * Performs the a piece of the {@link IterativeTask}.
      * This method may result in one or more steps being completed, but should not block for an extended period of time, as pausing and canceling are handled between calls.
      * @throws Exception indicates that the process has been compromised. The task will register as failed, and attempt to undo any changes.
      * @see #hasNext()
@@ -42,7 +50,7 @@ public interface IterativeTask {
 
     /**
      * Called when the task fails.
-     * @apiNote This method will be called when an exception thrown during execution is not handled by a FailedTaskHandler.
+     * @apiNote This method will be called when an exception thrown during execution is not handled by a {@link FailedTaskHandler}.
      */
     public void failed();
 

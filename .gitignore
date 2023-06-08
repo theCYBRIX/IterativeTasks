@@ -1,0 +1,6 @@
+# ignore given types
+*.zip
+*.jar
+
+# ignore vscode data
+.vscode

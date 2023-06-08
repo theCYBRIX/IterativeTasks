@@ -26,12 +26,9 @@ public class ProgressWatcher<E extends IterativeTask> {
         if(updateDelayMS <= 0) throw new IllegalArgumentException("Delay between updates may not be less than or equal to zero.");
         this.updateDelayMS = updateDelayMS;
 
-        UPDATE_CALL = new Runnable() {
-            @Override
-            public void run() {
-                E task = TO_WATCH.getTask();
-                CALLBACKS.onStateUpdated(TO_WATCH, task.getStepsCompleted(), task.getTotalNumSteps());
-            }
+        UPDATE_CALL = () -> {
+            E task = TO_WATCH.getTask();
+            CALLBACKS.onStateUpdated(TO_WATCH, task.getStepsCompleted(), task.getTotalNumSteps());
         };
 
         this.setAutoWatchingEnabled(true);
@@ -108,6 +105,7 @@ public class ProgressWatcher<E extends IterativeTask> {
 
     } 
 
+    @FunctionalInterface
     public static interface ProgressListener<T extends IterativeTask> {
         public void onStateUpdated(TaskExecuter<? extends T> process, long stepsCompleted, long totalNumSteps);
     }

@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Allows for the completion of multiple IterativeTask objects in sequence, as a single IterativeTask.
+ * Allows for the execution of multiple IterativeTask objects in sequence, as a single IterativeTask.
  */
 public class ChainedIterativeTask<E extends IterativeTask> implements IterativeTask, Collection<E>{
     final private LinkedList<CachedTask<? extends E>> TASK_QUEUE = new LinkedList<>();
